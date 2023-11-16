@@ -6,7 +6,8 @@ import com.example.JademonLog.dto.token.TokenDto;
 import com.example.JademonLog.entity.member.Member;
 import com.example.JademonLog.entity.member.MemberRepository;
 import com.example.JademonLog.jwt.TokenProvider;
-import com.example.JademonLog.response.DefaultRes;
+import com.example.JademonLog.response.BasicResponse;
+import com.example.JademonLog.response.ErrorResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,8 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
-    public static final DefaultRes res = new DefaultRes<>(HttpStatus.OK, HttpStatus.OK.value(), "ok");
+    public static final BasicResponse res = new BasicResponse().success("ok", null);
+
     public static HashMap<String, Object> data = new HashMap<>();
 
     public boolean passwordDuplicate(String password, String passwordCk) {
@@ -51,27 +53,26 @@ public class AuthService {
             }
 
             if(memberRepository.findByEmail(memberRequestDto.getEmail()).isPresent()) {
-                res.setResponseMessage("이미 가입되어 있는 유저입니다");
-                throw new RuntimeException(res.getResponseMessage());
+                res.setMessage("이미 가입되어 있는 유저입니다");
+                throw new RuntimeException(res.getMessage());
             }
             else if(!passwordDuplicate(memberRequestDto.getPassword(), memberRequestDto.getPasswordck())) {
-                res.setResponseMessage("비밀번호가 다릅니다");
-                throw new RuntimeException(res.getResponseMessage());
+                res.setMessage("비밀번호가 다릅니다");
+                throw new RuntimeException(res.getMessage());
             }
 
-            res.setResponseMessage("회원가입이 완료되었습니다");
+            res.setMessage("회원가입이 완료되었습니다");
             Member user = memberRequestDto.toMember(passwordEncoder);
 
             data.put("data", MemberResponseDto.of(memberRepository.save(user)));
 
-            DefaultRes response = DefaultRes.res(HttpStatus.OK, HttpStatus.OK.value(), res.getResponseMessage(), data);
+            res.setResult(data);
 
-            return new ResponseEntity(response, response.getHttpStatus());
+            return new ResponseEntity(res, res.getHttpStatus());
 
         } catch(Exception e) {
             e.printStackTrace();
-            DefaultRes response = DefaultRes.res(HttpStatus.OK, HttpStatus.OK.value(), res.getResponseMessage());
-            return new ResponseEntity(response, response.getHttpStatus());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -86,13 +87,11 @@ public class AuthService {
 
             data.put("token", tokenDto);
 
-            DefaultRes response = DefaultRes.res(HttpStatus.OK, HttpStatus.OK.value(), res.getResponseMessage(), data);
-            return new ResponseEntity(response, response.getHttpStatus());
+            res.setResult(data);
+            return new ResponseEntity(res, res.getHttpStatus());
         } catch(Exception e) {
             e.printStackTrace();
-
-            DefaultRes response = DefaultRes.res(HttpStatus.OK, HttpStatus.OK.value(), res.getResponseMessage());
-            return new ResponseEntity(response, response.getHttpStatus());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

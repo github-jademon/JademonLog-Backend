@@ -37,8 +37,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         return memberRepository.findByEmail(username)
                 .map(this::createUserDetails)
                 .orElseThrow(()-> {
-                    AuthService.res.setResponseMessage("Username not found '"+ username + "'");
-                    new UsernameNotFoundException(AuthService.res.getResponseMessage());
+                    AuthService.res.setMessage("Username not found '"+ username + "'");
+                    new UsernameNotFoundException(AuthService.res.getMessage());
                     return null;
                 });
     }

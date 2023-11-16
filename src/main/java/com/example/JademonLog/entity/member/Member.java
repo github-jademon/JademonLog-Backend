@@ -1,6 +1,7 @@
 package com.example.JademonLog.entity.member;
 
 import com.example.JademonLog.entity.authority.Authority;
+import com.example.JademonLog.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,8 @@ public class Member {
     private String password;
     @Enumerated(EnumType.STRING)
     private Authority authority;
+    @OneToMany
+    private List<Post> posts;
 
     @Builder
     public Member(String email, String userid, String password, Authority authority) {
