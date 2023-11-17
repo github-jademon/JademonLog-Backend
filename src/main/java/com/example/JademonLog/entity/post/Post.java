@@ -3,15 +3,15 @@ package com.example.JademonLog.entity.post;
 import com.example.JademonLog.entity.image.Image;
 import com.example.JademonLog.entity.member.Member;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Post {
     @Id
@@ -32,14 +32,5 @@ public class Post {
 
     @ManyToOne
     private Member writer;
-
-    public Post(String title, String desc, String source, Member writer) {
-        this.title = title;
-        this.desc = desc;
-        this.source = source;
-        this.date = LocalDateTime.now();
-        this.writer = writer;
-    }
-
 
 }

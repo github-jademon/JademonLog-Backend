@@ -15,50 +15,50 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private final CustomUserDetailsService customUserDetailsService;
     @Override
     public Authentication authenticate(Authentication authentication) {
-        AuthService.res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        AuthService.res.setResponseMessage("OK");
+        AuthService.res.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        AuthService.res.setMessage("OK");
         try {
             if(authentication == null){
-                AuthService.res.setResponseMessage("Authentication is null");
-                throw new InternalAuthenticationServiceException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("Authentication is null");
+                throw new InternalAuthenticationServiceException(AuthService.res.getMessage());
             }
             String username = authentication.getName();
             if(authentication.getCredentials() == null){
-                AuthService.res.setResponseMessage("Credentials is null");
-                throw new AuthenticationCredentialsNotFoundException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("Credentials is null");
+                throw new AuthenticationCredentialsNotFoundException(AuthService.res.getMessage());
             }
             String password = authentication.getCredentials().toString();
             UserDetails loadedUser = customUserDetailsService.loadUserByUsername(username);
             if(loadedUser == null){
-                AuthService.res.setResponseMessage("UserDetailsService returned null, which is an interface contract violation");
-                throw new InternalAuthenticationServiceException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("UserDetailsService returned null, which is an interface contract violation");
+                throw new InternalAuthenticationServiceException(AuthService.res.getMessage());
             }
             /* checker */
             if(!loadedUser.isAccountNonLocked()){
-                AuthService.res.setResponseMessage("User account is locked");
-                throw new LockedException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("User account is locked");
+                throw new LockedException(AuthService.res.getMessage());
             }
             if(!loadedUser.isEnabled()){
-                AuthService.res.setResponseMessage("User is disabled");
-                throw new DisabledException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("User is disabled");
+                throw new DisabledException(AuthService.res.getMessage());
             }
             if(!loadedUser.isAccountNonExpired()){
-                AuthService.res.setResponseMessage("User account has expired");
-                throw new AccountExpiredException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("User account has expired");
+                throw new AccountExpiredException(AuthService.res.getMessage());
             }
             /* 실질적인 인증 */
             if(!passwordEncoder.matches(password, loadedUser.getPassword())){
-                AuthService.res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-                AuthService.res.setResponseMessage("Password does not match stored value");
-                throw new BadCredentialsException(AuthService.res.getResponseMessage());
+                AuthService.res.setCode(HttpStatus.BAD_REQUEST.value());
+                AuthService.res.setMessage("Password does not match stored value");
+                throw new BadCredentialsException(AuthService.res.getMessage());
             }
             /* checker */
             if(!loadedUser.isCredentialsNonExpired()){
-                AuthService.res.setResponseMessage("User credentials have expired");
-                throw new CredentialsExpiredException(AuthService.res.getResponseMessage());
+                AuthService.res.setMessage("User credentials have expired");
+                throw new CredentialsExpiredException(AuthService.res.getMessage());
             }
             /* 인증 완료 */
-            AuthService.res.setStatusCode(HttpStatus.OK.value());
+            AuthService.res.setCode(HttpStatus.OK.value());
             UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(loadedUser, null, loadedUser.getAuthorities());
             result.setDetails(authentication.getDetails());
             return result;
